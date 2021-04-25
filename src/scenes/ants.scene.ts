@@ -7,7 +7,8 @@
    private cHeight: number;
    private fieldColor: string;
    private ants: Phaser.GameObjects.Group;
-   private antsNum = 100;
+   private anthill: Phaser.GameObjects.Image;
+   private antsNum = 200;
    constructor() {
      super({
        key: 'AntsScene'
@@ -16,6 +17,8 @@
  
    preload(): void {
     this.load.image('ant', '../assets/ant.png')
+    this.load.image('anthill', '../assets/anthill.png')
+    this.load.image("grass", "../assets/grass.jpg");
   }
 
    init(): void {
@@ -39,8 +42,23 @@
    }
  
   create() {
+    const p = this.add.image(this.cWidth/2, this.cHeight/2, "grass");
+    p.displayHeight = this.cHeight;
+    p.scaleX = p.scaleY
+    this.anthill = this.add.image(this.cWidth/2, this.cHeight/2, 'anthill').setScale(0.3)
     this.ants = this.add.group(
-      [ ...Array(this.antsNum).keys() ].map(el=> new Ant(this, 300, 300)),
+      [ ...Array(this.antsNum).keys() ].map(el=> new Ant(this, this.cWidth/2, this.cHeight/2)),
       {runChildUpdate: true})
+      this.time.addEvent({
+        delay: 1000,                // ms
+        callback: () => {
+          this.ants.children.iterate ((child) => {
+            //child.setFeromone()
+          })
+        },
+        args: [],
+        //callbackScope: this,
+        loop: true
+    });
     }
  }

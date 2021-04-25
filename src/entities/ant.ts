@@ -1,6 +1,8 @@
 import 'phaser';
+import { AntObjective } from '../enums/ant.objective.enum';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
     private _speed = 150;
+    private _objective = AntObjective.findFood;
     constructor(scene: Phaser.Scene, px: number, py: number) {
       super(scene, px, py, 'ant');
       this.setScale(0.17);
@@ -20,11 +22,23 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
     //   this.velocity = newVelocity;
     // }
 
+    get objective() {
+      return this._objective
+    }
 
+    set objective(value: AntObjective) {
+      this._objective = value
+    }
     move() {
       //this.scenephysics.velocityFromRotation(angle, 600, chick.body.velocity);
       //this.physics.velocityFromRotation(sprite.rotation, 200, sprite.body.acceleration);
     }
+
+    setFeromone() {
+      console.log('set feromone')
+      // TODO implement
+    }
+
     update () {
       this.scene.physics.world.wrap(this);
       this.angle += Math.random() < 0.5 ? -3 : 3
