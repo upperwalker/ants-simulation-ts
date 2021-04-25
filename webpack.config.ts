@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require("copy-webpack-plugin");
 module.exports = {
   entry: './src/main.ts',
   output: {
@@ -20,21 +21,25 @@ module.exports = {
       }
     ]
   },
-  // plugins: [ 
-  //     new HtmlWebpackPlugin({
-  //         title: '',
-  //         template: path.resolve(__dirname, './src/index.html'), 
-  //         filename: 'index.html',
-  //     }),
-  //     //new CleanWebpackPlugin(),
-  //     //new CopyPlugin({
-  // ],
+  plugins: [ 
+      new HtmlWebpackPlugin({
+          title: 'Ants simulation',
+          author: 'upperwalker',
+          template: path.resolve(__dirname, './src/index.html'), 
+          filename: 'index.html',
+      }),
+      new CopyPlugin({
+        patterns: [
+          { from: "./src/assets", to: "assets" }
+        ],
+      }),
+  ],
   devServer: {
-    contentBase: path.resolve(__dirname, './'),
+    contentBase: path.resolve(__dirname, 'dist'),
     publicPath: '/dist/',
     host: 'localhost',
     port: 8080,
-    open: false
+    open: true
   },
   resolve: {
     extensions: ['.ts', '.js']

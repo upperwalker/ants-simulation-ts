@@ -7,6 +7,13 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   height: 600,
   type: Phaser.AUTO,
   parent: 'game',
+  physics: {
+    default: 'arcade',
+    arcade: {
+        fps: 60,
+        gravity: { y: 0 }
+    }
+  },
   scene: [AntsScene],
   backgroundColor: '#ededed',
   render: { pixelArt: false, antialias: true }
