@@ -44,7 +44,7 @@ import { Grid } from '../entities/grid';
  
   create() {
     const p = this.add.image(this.cWidth/2, this.cHeight/2, "grass");
-    this.grid = new Grid(this.cWidth/4, this.cHeight/4)
+    this.grid = new Grid(this, this.cWidth/4, this.cHeight/4)
     p.displayHeight = this.cHeight;
     p.scaleX = p.scaleY
     this.anthill = this.add.image(this.cWidth/2, this.cHeight/2, 'anthill').setScale(0.3)
@@ -52,10 +52,10 @@ import { Grid } from '../entities/grid';
       [ ...Array(this.antsNum).keys() ].map(el=> new Ant(this, this.cWidth/2, this.cHeight/2)),
       {runChildUpdate: true})
       this.time.addEvent({
-        delay: 1000,                // ms
+        delay: 200, // ms
         callback: () => {
-          this.ants.children.iterate ((child) => {
-            //child.setFeromone()
+          this.ants.children.iterate ((child: Ant) => {
+            child.setFeromone()
           })
         },
         args: [],

@@ -1,8 +1,10 @@
 import 'phaser';
 import { AntObjective } from '../enums/ant.objective.enum';
 import { AntsScene } from '../scenes/ants.scene';
+import { Sensor } from './sensor';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
     private _speed = 150;
+    private _searchRadius = 5
     private _objective = AntObjective.findFood;
     prevGridX: number
     prevGridY: number
@@ -41,8 +43,13 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
     }
 
     setFeromone() {
-      console.log('set feromone')
+      this.scene.grid.marks[this.prevGridX][this.prevGridY].point.fillColor = 0xff0000
       // TODO implement
+    }
+
+    search() {
+      //Sensor.isInsideSector()
+      //this.scene.grid.findNeighbours(this.prevGridX, this.prevGridY, this._searchRadius)
     }
 
     update () {
@@ -52,9 +59,10 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
       if (curGridX !== this.prevGridX || curGridY !== this.prevGridY) {
         this.prevGridX = curGridX
         this.prevGridY = curGridY
-        console.log(curGridX, curGridY)
-        console.log(this.scene.grid.marks[curGridX][curGridY])
+        // console.log(curGridX, curGridY)
+        // console.log(this.scene.grid.marks[curGridX][curGridY])
         // here search of food should be called
+        this.search()
       }
 
       this.angle += Math.random() < 0.5 ? -3 : 3
