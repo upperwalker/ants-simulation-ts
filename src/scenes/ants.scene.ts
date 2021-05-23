@@ -1,5 +1,5 @@
-
- import { Ant } from '../entities/ant';
+import { Ant } from '../entities/ant';
+import { Grid } from '../entities/grid';
  
  export class AntsScene extends Phaser.Scene {
    // Grid
@@ -8,7 +8,8 @@
    private fieldColor: string;
    private ants: Phaser.GameObjects.Group;
    private anthill: Phaser.GameObjects.Image;
-   private antsNum = 200;
+   private antsNum = 1;
+   public grid: Grid
    constructor() {
      super({
        key: 'AntsScene'
@@ -43,6 +44,7 @@
  
   create() {
     const p = this.add.image(this.cWidth/2, this.cHeight/2, "grass");
+    this.grid = new Grid(this.cWidth/4, this.cHeight/4)
     p.displayHeight = this.cHeight;
     p.scaleX = p.scaleY
     this.anthill = this.add.image(this.cWidth/2, this.cHeight/2, 'anthill').setScale(0.3)
