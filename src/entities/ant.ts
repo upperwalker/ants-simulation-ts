@@ -5,6 +5,7 @@ import { Sensor } from './sensor';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
     private _speed = 150;
     private _searchRadius = 5
+    private _searchAngle = 2; // radians
     private _objective = AntObjective.findFood;
     prevGridX: number
     prevGridY: number
@@ -49,7 +50,7 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
 
     search() {
       //Sensor.isInsideSector()
-      //this.scene.grid.findNeighbours(this.prevGridX, this.prevGridY, this._searchRadius)
+      this.scene.grid.getPointsInSector(this.prevGridX, this.prevGridY, this._searchRadius, this._searchAngle, this.body.velocity).forEach(el => el.fillColor = 0xffff00)
     }
 
     update () {

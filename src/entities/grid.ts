@@ -1,4 +1,5 @@
 import { AntsScene } from "../scenes/ants.scene";
+import { Point } from "../types/point";
 import { Mark } from "./mark";
 
 export class Grid {
@@ -15,16 +16,42 @@ export class Grid {
       this.marks.push(row);
     }
   }
-  findNeighbours(i: number, j: number, radius: number) {     
-    for(let x = Math.max(0, i - radius); x <= Math.min(i + radius, this.sizeX); x++) {
-      for(let y = Math.max(0, j - radius); y <= Math.min(j + radius, this.sizeY); y++) {
+  carryBorderPoint({x, y}: Point): Point {
+    if (x < 0) x += this.sizeX;
+    if (y < 0) y += this.sizeY;
+    if (x >= this.sizeX) x -= this.sizeX;
+    if (y >= this.sizeY) y -= this.sizeY;
+    return {x, y}
+  }
+  getPointsInSector(i: number, j: number, radius: number, angle: number, velocity: Phaser.Math.Vector2) { 
+    const result: Phaser.GameObjects.Rectangle[] = []; 
+    for(let x = i - radius; x <= i + radius; x++) {
+      for(let y = j - radius; y <= j + radius; y++) {
         if(x !== i || y !== j) {
-          try {
-            this.marks[x][y].point.fillColor = 0xffff00
-          } catch(err) {console.log(i, j, x, y)}
+          let {x: sx, y: sy} = velocity.clone().setLength(radius).rotate(-angle/2);
+          let {x: fx, y: fy} = velocity.clone().setLength(radius).rotate(angle/2);
+          console.log(sx, sy, fx, fy)
+          if (this.isInsideSector({x, y}, {x: i, y: j}, {x: i + sx, y: j + sy}, {x: i + fx, y: j + fy})) {
+            const {x: l, y: m} = this.carryBorderPoint({x,y});
+            result.push(this.marks[l][m].point)
+          }
         }
       }
     }
+    return result;
+  }
+  areClockwise(v1: Point, v2: Point): Boolean {
+    return -v1.x*v2.y + v1.y*v2.x > 0;
+  }
+  isInsideSector(point: Point, center: Point, sectorStart: Point, sectorEnd: Point): Boolean {
+
+    const relPoint: Point = {
+        x: point.x - center.x,
+        y: point.y - center.y
+    }
+
+    return !this.areClockwise(sectorStart, relPoint) &&
+        this.areClockwise(sectorEnd, relPoint);
   }
   
 }
