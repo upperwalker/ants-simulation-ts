@@ -4,8 +4,8 @@ import { AntsScene } from '../scenes/ants.scene';
 import { Sensor } from './sensor';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
     private _speed = 150;
-    private _searchRadius = 5
-    private _searchAngle = 2; // radians
+    private _searchRadius = 20
+    private _searchAngle = 1; // radians
     private _objective = AntObjective.findFood;
     prevGridX: number
     prevGridY: number
@@ -60,15 +60,14 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
       if (curGridX !== this.prevGridX || curGridY !== this.prevGridY) {
         this.prevGridX = curGridX
         this.prevGridY = curGridY
+        this.angle += Math.random() < 0.5 ? -3 : 3
+        const { x, y } = this.scene.physics.velocityFromAngle(this.angle - 90, this._speed)
+        this.setVelocity(x, y)
         // console.log(curGridX, curGridY)
         // console.log(this.scene.grid.marks[curGridX][curGridY])
         // here search of food should be called
         this.search()
       }
-
-      this.angle += Math.random() < 0.5 ? -3 : 3
-      const { x, y } = this.scene.physics.velocityFromAngle(this.angle - 90, this._speed)
-      this.setVelocity(x, y)
     }
 
     // public setValue(v: number): void {
