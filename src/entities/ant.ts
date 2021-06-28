@@ -1,11 +1,11 @@
 import 'phaser';
 import { AntObjective } from '../enums/ant.objective.enum';
 import { AntsScene } from '../scenes/ants.scene';
-import { Sensor } from './sensor';
+import { Mark } from './mark';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
     private _speed = 150;
     private _searchRadius = 20
-    private _searchAngle = 1; // radians
+    private _searchAngle = 0.3; // radians
     private _objective = AntObjective.findFood;
     prevGridX: number
     prevGridY: number
@@ -50,7 +50,22 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
 
     search() {
       //Sensor.isInsideSector()
-      this.scene.grid.getPointsInSector(this.prevGridX, this.prevGridY, this._searchRadius, this._searchAngle, this.body.velocity).forEach(el => el.fillColor = 0xffff00)
+      const searchedSector = this.scene.grid.getMarksInSector(this.prevGridX, this.prevGridY, this._searchRadius, this._searchAngle, this.body.velocity);
+      searchedSector.forEach(el => el.point.fillColor = 0xffff00)
+      if (this.objective === AntObjective.findFood) {
+        let max: Mark
+        for (let mark of searchedSector) {
+          if (mark.toFood && mark.toFood > (max?.toFood || 0)) max = mark
+        }
+        if (max) {
+          const vector = new Phaser.Math.Vector2(max.point.x - this.x , max.point.y - this.y);
+          this.angle = vector.angle();
+          const { x, y } = this.scene.physics.velocityFromAngle(vector.angle() - 90, this._speed)
+          this.setVelocity(x, y)
+          return true
+        }
+      }
+      return false
     }
 
     update () {
@@ -60,13 +75,14 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
       if (curGridX !== this.prevGridX || curGridY !== this.prevGridY) {
         this.prevGridX = curGridX
         this.prevGridY = curGridY
-        this.angle += Math.random() < 0.5 ? -3 : 3
-        const { x, y } = this.scene.physics.velocityFromAngle(this.angle - 90, this._speed)
-        this.setVelocity(x, y)
+        if (!this.search()) { // randomly wander
+          this.angle += Math.random() < 0.5 ? -3 : 3 
+          const { x, y } = this.scene.physics.velocityFromAngle(this.angle - 90, this._speed)
+          this.setVelocity(x, y)
+        }
         // console.log(curGridX, curGridY)
         // console.log(this.scene.grid.marks[curGridX][curGridY])
         // here search of food should be called
-        this.search()
       }
     }
 
