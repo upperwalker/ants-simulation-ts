@@ -8,7 +8,7 @@ import { Grid } from '../entities/grid';
    private fieldColor: string;
    private ants: Phaser.GameObjects.Group;
    private anthill: Phaser.GameObjects.Image;
-   private antsNum = 100;
+   private antsNum = 1;
    public grid: Grid
    constructor() {
      super({

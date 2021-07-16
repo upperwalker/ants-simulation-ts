@@ -11,7 +11,7 @@ export class Grid {
       let row:Mark[]  = new Array<Mark>();      
       for (let j = 0; j < sizeY; j++){
 
-        if ( Math.random() < 0.001 ) {  // test food :)
+        if ( Math.random() < 0.0001 ) {  // test food :)
           const point = scene.add.rectangle(i*4, j*4, 3, 3, 0x0000ff) //new Phaser.Geom.Rectangle(i*4, j*4, 3, 3);
           row.push(new Mark(point, 10));
         } else {

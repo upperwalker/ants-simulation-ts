@@ -4,8 +4,8 @@ import { AntsScene } from '../scenes/ants.scene';
 import { Mark } from './mark';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
     private _speed = 150;
-    private _searchRadius = 20
-    private _searchAngle = 0.3; // radians
+    private _searchRadius = 30
+    private _searchAngle = 1; // radians
     private _objective = AntObjective.findFood;
     prevGridX: number
     prevGridY: number
@@ -51,7 +51,7 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
     search() {
       //Sensor.isInsideSector()
       const searchedSector = this.scene.grid.getMarksInSector(this.prevGridX, this.prevGridY, this._searchRadius, this._searchAngle, this.body.velocity);
-      searchedSector.forEach(el => el.point.fillColor = 0xffff00)
+      //searchedSector.forEach(el => el.point.fillColor = 0xffff00)
       if (this.objective === AntObjective.findFood) {
         let max: Mark
         for (let mark of searchedSector) {
@@ -59,8 +59,8 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
         }
         if (max) {
           const vector = new Phaser.Math.Vector2(max.point.x - this.x , max.point.y - this.y);
-          this.angle = vector.angle();
-          const { x, y } = this.scene.physics.velocityFromAngle(vector.angle() - 90, this._speed)
+          this.angle = (180/Math.PI)*vector.angle() + 90;
+          const { x, y } = this.scene.physics.velocityFromAngle(this.angle, this._speed)
           this.setVelocity(x, y)
           return true
         }
