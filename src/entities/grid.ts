@@ -3,25 +3,24 @@ import { Point } from "../types/point";
 import { Mark } from "./mark";
 
 export class Grid {
-
+  scene: Phaser.Scene;
   marks: Mark[][];
   constructor(scene: AntsScene, public sizeX: number, public sizeY: number) {
+    this.scene = scene;
     this.marks = new Array<Array<Mark>>();
     for (let i = 0; i < sizeX; i++) {
       let row:Mark[]  = new Array<Mark>();      
       for (let j = 0; j < sizeY; j++){
-
-        if ( Math.random() < 0.0001 ) {  // test food :)
-          const point = scene.add.rectangle(i*4, j*4, 3, 3, 0x0000ff) //new Phaser.Geom.Rectangle(i*4, j*4, 3, 3);
-          row.push(new Mark(point, 10));
-        } else {
-          const point = scene.add.rectangle(i*4, j*4, 3, 3, 0x00ff00) //new Phaser.Geom.Rectangle(i*4, j*4, 3, 3);
+          const point = scene.add.rectangle(i*4, j*4, 3, 3, 0xffffff) //new Phaser.Geom.Rectangle(i*4, j*4, 3, 3);
           row.push(new Mark(point));
-        }
 
       }
       this.marks.push(row);
     }
+  }
+  setFood({x, y}: Point) {
+    const point = this.scene.add.rectangle(this.toGridNum(x)*4, this.toGridNum(y)*4, 3, 3, 0x00ff00)
+    this.marks[this.toGridNum(x)][this.toGridNum(y)] = new Mark(point, undefined, undefined, 1)
   }
   toGridNum(from: number): number{
     return Math.floor(from/4);

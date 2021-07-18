@@ -1,5 +1,6 @@
 import { Ant } from '../entities/ant';
 import { Grid } from '../entities/grid';
+import { Point } from '../types/point';
  
  export class AntsScene extends Phaser.Scene {
    // Grid
@@ -52,7 +53,7 @@ import { Grid } from '../entities/grid';
       [ ...Array(this.antsNum).keys() ].map(el=> new Ant(this, this.cWidth/2, this.cHeight/2)),
       {runChildUpdate: true})
       this.time.addEvent({
-        delay: 200, // ms
+        delay: 300, // ms
         callback: () => {
           this.ants.children.iterate ((child: Ant) => {
             child.setFeromone()
@@ -62,5 +63,13 @@ import { Grid } from '../entities/grid';
         //callbackScope: this,
         loop: true
     });
+      this.input.on('pointerdown', function (pointer: Point) {
+
+          console.log('down');
+
+          this.grid.setFood(pointer)
+      }, this);
+
     }
+    
  }

@@ -1,4 +1,4 @@
-export enum AntObjective {
-    findFood,
-    goHome
+export enum AntsObjective {
+    toFood = "toFood",
+    toHome = "toHome"
 }
