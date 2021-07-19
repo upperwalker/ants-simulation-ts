@@ -1,15 +1,16 @@
 import { Ant } from '../entities/ant';
 import { Grid } from '../entities/grid';
+import { AntsObjective } from '../enums/ant.objective.enum';
 import { Point } from '../types/point';
  
  export class AntsScene extends Phaser.Scene {
    // Grid
-   private cWidth: number;
-   private cHeight: number;
+   cWidth: number;
+   cHeight: number;
    private fieldColor: string;
    private ants: Phaser.GameObjects.Group;
    private anthill: Phaser.GameObjects.Image;
-   private antsNum = 1;
+   private antsNum = 500;
    public grid: Grid
    constructor() {
      super({
@@ -53,7 +54,7 @@ import { Point } from '../types/point';
       [ ...Array(this.antsNum).keys() ].map(el=> new Ant(this, this.cWidth/2, this.cHeight/2)),
       {runChildUpdate: true})
       this.time.addEvent({
-        delay: 300, // ms
+        delay: 250, // ms
         callback: () => {
           this.ants.children.iterate ((child: Ant) => {
             child.setFeromone()
@@ -63,13 +64,24 @@ import { Point } from '../types/point';
         //callbackScope: this,
         loop: true
     });
-      this.input.on('pointerdown', function (pointer: Point) {
-
-          console.log('down');
-
-          this.grid.setFood(pointer)
-      }, this);
-
-    }
-    
+    this.time.addEvent({
+      delay: 1000, // ms
+      callback: () => {
+        for (let i = 0; i < this.grid.sizeX; i++) {    
+          for (let j = 0; j < this.grid.sizeY; j++){
+            const mark = this.grid.marks[i][j]
+            if (mark.toFood) this.grid.decrease(mark, AntsObjective.toFood)
+            if (mark.toHome) this.grid.decrease(mark, AntsObjective.toHome)
+          }
+        }
+      },
+      args: [],
+      //callbackScope: this,
+      loop: true
+  });
+  const mouse = this.input.mousePointer;
+  this.input.on('pointermove', (pointer: Point) => {
+    if (mouse.isDown) this.grid.setFood(pointer)
+  }, this);
  }
+}

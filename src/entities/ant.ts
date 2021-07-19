@@ -3,10 +3,14 @@ import { AntsObjective } from '../enums/ant.objective.enum';
 import { AntsScene } from '../scenes/ants.scene';
 import { Mark } from './mark';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
-    private _speed = 150;
+    private _speed = 140;
     private _searchRadius = 30
     private _searchAngle = 1; // radians
+    private _pheromoneTtl= 5; // seconds
+    private _was = 40 // *250 ms 
     private _objective = AntsObjective.toFood;
+    wasHome = this._was;
+    wasFood = 0;
     curGridX: number;
     curGridY: number;
     prevGridX: number; 
@@ -39,6 +43,9 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
       return this._objective
     }
 
+    get curMark() {
+      return this.scene.grid.marks[this.curGridX][this.curGridY]
+    }
     set objective(value) {
       this._objective = value
     }
@@ -48,38 +55,54 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
     }
 
     setFeromone() {
-     // if (this.objective === AntsObjective.toFood || this.objective === AntsObjective.toHome) {
-       const opposite =  this.objective == AntsObjective.toFood ? 
-        { 
-          color: 0xff0000, 
-          objective: AntsObjective.toHome
-        } :
-        { 
-          color: 0x0000ff,
-          objective: AntsObjective.toFood
+        if (!this.curMark.home && this.wasHome && this.objective == AntsObjective.toFood) {
+          this.curMark.toHome = this.wasHome
+          this.curMark.point.fillColor = 0xff0000
+          this.wasHome-- 
+        } else if (!this.curMark.food && this.wasFood && this.objective == AntsObjective.toHome) {
+          this.curMark.toFood = this.wasFood;
+          this.curMark.point.fillColor = 0x0000ff
+          this.wasFood-- 
         }
-        this.scene.grid.marks[this.curGridX][this.curGridY][opposite.objective] = 1
-        this.scene.grid.marks[this.curGridX][this.curGridY].point.fillColor = opposite.color
-     // }
-      // TODO implement
     }
 
     search() {
       //Sensor.isInsideSector()
-      if (this.scene.grid.marks[this.curGridX][this.curGridY].food) {
-
-        if (!(--this.scene.grid.marks[this.curGridX][this.curGridY].food)) this.scene.grid.marks[this.curGridX][this.curGridY].point.fillColor = 0xffffff;
+      if (this.curMark.food && this.objective === AntsObjective.toFood) {
+        this.wasFood = this._was;
+        if (!(--this.curMark.food)) this.curMark.point.fillColor = 0xffffff;
         this.objective = AntsObjective.toHome;
+        this.angle -= 180
+        this.scene.physics.velocityFromAngle(this.angle - 90, this._speed, this.body.velocity)
         return true
+      } else if (this.curMark.home && this.objective === AntsObjective.toHome) {
+        this.objective = AntsObjective.toFood;
+        this.angle -= 180
+        this.scene.physics.velocityFromAngle(this.angle - 90, this._speed, this.body.velocity)
+        return true  
+      } else if (this.curMark.home && this.objective === AntsObjective.toFood) {
+        this.wasHome = this._was;
       }
       const searchedSector = this.scene.grid.getMarksInSector(this.curGridX, this.curGridY, this._searchRadius, this._searchAngle, this.body.velocity);
       //searchedSector.forEach(el => el.point.fillColor = 0xffff00)
       let max: Mark
       for (let mark of searchedSector) {
+        if ((mark.food && this.objective === AntsObjective.toFood) || (mark.home  && this.objective === AntsObjective.toHome)) {
+          max = mark
+          break;
+        }
         if (mark[this.objective] && mark[this.objective] > (max?.[this.objective] || 0)) max = mark
       }
       if (max) {
-        const vector = new Phaser.Math.Vector2(max.point.x - this.x , max.point.y - this.y);
+        let dirX = max.point.x - this.x
+        let dirY = max.point.y - this.y
+        if (Math.abs(dirX) > this.scene.cWidth/2 ) {
+          dirX > 0 ? dirX -= this.scene.cWidth : dirX += this.scene.cWidth
+        }
+        if (Math.abs(dirY) > this.scene.cHeight/2 ) {
+          dirY > 0 ? dirY -= this.scene.cHeight : dirY += this.scene.cHeight
+        }
+        const vector = new Phaser.Math.Vector2(dirX , dirY);
         this.angle = (180/Math.PI)*vector.angle() + 90;
         this.scene.physics.velocityFromAngle(this.angle - 90, this._speed, this.body.velocity)
         return true

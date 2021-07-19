@@ -1,3 +1,4 @@
+import { AntsObjective } from "../enums/ant.objective.enum";
 import { AntsScene } from "../scenes/ants.scene";
 import { Point } from "../types/point";
 import { Mark } from "./mark";
@@ -12,15 +13,19 @@ export class Grid {
       let row:Mark[]  = new Array<Mark>();      
       for (let j = 0; j < sizeY; j++){
           const point = scene.add.rectangle(i*4, j*4, 3, 3, 0xffffff) //new Phaser.Geom.Rectangle(i*4, j*4, 3, 3);
-          row.push(new Mark(point));
+          if ((sizeX/2 - i)**2 + (sizeY/2 - j)**2 < 100)  row.push(new Mark(point, undefined, undefined, undefined, 1));
+          else row.push(new Mark(point));
 
       }
       this.marks.push(row);
     }
   }
   setFood({x, y}: Point) {
-    const point = this.scene.add.rectangle(this.toGridNum(x)*4, this.toGridNum(y)*4, 3, 3, 0x00ff00)
-    this.marks[this.toGridNum(x)][this.toGridNum(y)] = new Mark(point, undefined, undefined, 1)
+    this.marks[this.toGridNum(x)][this.toGridNum(y)].point.fillColor = 0x00ff00
+    this.marks[this.toGridNum(x)][this.toGridNum(y)].food = 25
+  }
+  decrease(mark: Mark, key: AntsObjective) {
+    if (! --mark[key]) mark.point.fillColor = 0xffffff
   }
   toGridNum(from: number): number{
     return Math.floor(from/4);
