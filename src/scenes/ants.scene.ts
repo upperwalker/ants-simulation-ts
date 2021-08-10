@@ -20,6 +20,7 @@ import { Point } from '../types/point';
  
    preload(): void {
     this.load.image('ant', '../assets/ant.png')
+    this.load.image('ant-food', '../assets/ant-food.png')
     this.load.image('anthill', '../assets/anthill.png')
     this.load.image("grass", "../assets/grass.jpg");
   }

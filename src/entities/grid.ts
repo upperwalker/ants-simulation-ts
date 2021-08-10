@@ -13,7 +13,7 @@ export class Grid {
       let row:Mark[]  = new Array<Mark>();      
       for (let j = 0; j < sizeY; j++){
           const point = scene.add.rectangle(i*4, j*4, 3, 3, 0xffffff) //new Phaser.Geom.Rectangle(i*4, j*4, 3, 3);
-          if ((sizeX/2 - i)**2 + (sizeY/2 - j)**2 < 100)  row.push(new Mark(point, undefined, undefined, undefined, 1));
+          if ((sizeX/2 - i)**2 + (sizeY/2 - j)**2 < 25)  row.push(new Mark(point, undefined, undefined, undefined, 1));
           else row.push(new Mark(point));
 
       }

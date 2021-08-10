@@ -3,14 +3,12 @@ import { AntsObjective } from '../enums/ant.objective.enum';
 import { AntsScene } from '../scenes/ants.scene';
 import { Mark } from './mark';
 export class Ant extends Phaser.Physics.Arcade.Sprite {
-    private _speed = 140;
-    private _searchRadius = 30
-    private _searchAngle = 1; // radians
-    private _pheromoneTtl= 5; // seconds
-    private _was = 40 // *250 ms 
+    private SPEED = 140;
+    private SEARCH_RADIUS = 30
+    private SEARCH_ANGLE = 1; // radians
+    private PHEROMONE_INTENCITY = 40 // *250 ms 
     private _objective = AntsObjective.toFood;
-    wasHome = this._was;
-    wasFood = 0;
+    feromone_intencity = this.PHEROMONE_INTENCITY;
     curGridX: number;
     curGridY: number;
     prevGridX: number; 
@@ -27,7 +25,7 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
       scene.physics.world.enable(this);
       scene.physics.world.wrap(this);
       this.setAngle(Phaser.Math.Between(-180, 180))
-      const { x, y } = scene.physics.velocityFromAngle(this.angle - 90, this._speed)
+      const { x, y } = scene.physics.velocityFromAngle(this.angle - 90, this.SPEED)
       this.setVelocity(x, y)
     }
   
@@ -55,35 +53,37 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
     }
 
     setFeromone() {
-        if (!this.curMark.home && this.wasHome && this.objective == AntsObjective.toFood) {
-          this.curMark.toHome = this.wasHome
+        if (this.feromone_intencity && this.objective == AntsObjective.toFood && !this.curMark.home) {
+          this.curMark.toHome = this.feromone_intencity
           this.curMark.point.fillColor = 0xff0000
-          this.wasHome-- 
-        } else if (!this.curMark.food && this.wasFood && this.objective == AntsObjective.toHome) {
-          this.curMark.toFood = this.wasFood;
+          this.feromone_intencity-- 
+        } else if (this.feromone_intencity && this.objective == AntsObjective.toHome && !this.curMark.food) {
+          this.curMark.toFood = this.feromone_intencity;
           this.curMark.point.fillColor = 0x0000ff
-          this.wasFood-- 
+          this.feromone_intencity-- 
         }
     }
 
     search() {
       //Sensor.isInsideSector()
       if (this.curMark.food && this.objective === AntsObjective.toFood) {
-        this.wasFood = this._was;
+        this.setTexture('ant-food');
+        this.feromone_intencity = this.PHEROMONE_INTENCITY;
         if (!(--this.curMark.food)) this.curMark.point.fillColor = 0xffffff;
         this.objective = AntsObjective.toHome;
         this.angle -= 180
-        this.scene.physics.velocityFromAngle(this.angle - 90, this._speed, this.body.velocity)
+        this.scene.physics.velocityFromAngle(this.angle - 90, this.SPEED, this.body.velocity)
         return true
       } else if (this.curMark.home && this.objective === AntsObjective.toHome) {
+        this.setTexture('ant');
         this.objective = AntsObjective.toFood;
         this.angle -= 180
-        this.scene.physics.velocityFromAngle(this.angle - 90, this._speed, this.body.velocity)
+        this.scene.physics.velocityFromAngle(this.angle - 90, this.SPEED, this.body.velocity)
         return true  
       } else if (this.curMark.home && this.objective === AntsObjective.toFood) {
-        this.wasHome = this._was;
+        this.feromone_intencity = this.PHEROMONE_INTENCITY;
       }
-      const searchedSector = this.scene.grid.getMarksInSector(this.curGridX, this.curGridY, this._searchRadius, this._searchAngle, this.body.velocity);
+      const searchedSector = this.scene.grid.getMarksInSector(this.curGridX, this.curGridY, this.SEARCH_RADIUS, this.SEARCH_ANGLE, this.body.velocity);
       //searchedSector.forEach(el => el.point.fillColor = 0xffff00)
       let max: Mark
       for (let mark of searchedSector) {
@@ -94,8 +94,8 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
         if (mark[this.objective] && mark[this.objective] > (max?.[this.objective] || 0)) max = mark
       }
       if (max) {
-        let dirX = max.point.x - this.x
-        let dirY = max.point.y - this.y
+        let dirX = max.point.x + 3 - this.x
+        let dirY = max.point.y + 3 - this.y
         if (Math.abs(dirX) > this.scene.cWidth/2 ) {
           dirX > 0 ? dirX -= this.scene.cWidth : dirX += this.scene.cWidth
         }
@@ -104,7 +104,7 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
         }
         const vector = new Phaser.Math.Vector2(dirX , dirY);
         this.angle = (180/Math.PI)*vector.angle() + 90;
-        this.scene.physics.velocityFromAngle(this.angle - 90, this._speed, this.body.velocity)
+        this.scene.physics.velocityFromAngle(this.angle - 90, this.SPEED, this.body.velocity)
         return true
       }
       return false
@@ -119,7 +119,7 @@ export class Ant extends Phaser.Physics.Arcade.Sprite {
         this.prevGridY = this.curGridY
         if (!this.search()) { // randomly wander
           this.angle += Math.random() < 0.5 ? -3 : 3 
-          const { x, y } = this.scene.physics.velocityFromAngle(this.angle - 90, this._speed)
+          const { x, y } = this.scene.physics.velocityFromAngle(this.angle - 90, this.SPEED)
           this.setVelocity(x, y)
         }
         // console.log(curGridX, curGridY)
